@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockly</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: slide;
+            background-color: #1e1e1e;
+            color: #c7c7c7;
+            font-family: Arial, sans-serif;
+        }
+        #blocklyDiv {
+            height: 100%;
+            width: 100%;
+        }
+        button {
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #333;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        #codeOutput {
+            background-color: #2d2d2d;
+            color: #c7c7c7;
+            overflow-y: auto;
+            height: 100px;
+            white-space: pre-wrap; /* To ensure long code lines wrap and do not overflow horizontally */
+        }
+    </style>
+    <!-- Load Blockly core -->
+    <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+    <!-- Load the default blocks -->
+    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+    <!-- Load the JavaScript generator -->
+    <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+    <!-- Load a message file -->
+    <script src="https://unpkg.com/blockly/msg/en.js"></script>
+</head>
+<body>
+    <div id="blocklyDiv"></div>
+    <button id="generateCode">Generar código JavaScript</button>
+    <button id="runCode">Ejecutar código</button>
+    <button onclick="extend()">Extender</button>
+    <button onclick="minimize()">Minimizar</button>
+    <button onclick="quit()">Quitar</button>
+    <pre id="codeOutput"></pre>
+    
+    <script>
+        // Define toolbox XML
+        var toolbox = `<xml xmlns="https://developers.google.com/blockly/xml">
+            <category name="Lógica" colour="210">
+                <block type="controls_if"></block>
+                <block type="logic_compare"></block>
+                <block type="logic_operation"></block>
+                <block type="logic_negate"></block>
+                <block type="logic_boolean"></block>
+                <block type="logic_null"></block>
+                <block type="logic_ternary"></block>
+            </category>
+            <category name="Bucles" colour="120">
+                <block type="controls_repeat_ext"></block>
+                <block type="controls_whileUntil"></block>
+                <block type="controls_for"></block>
+                <block type="controls_forEach"></block>
+                <block type="controls_flow_statements"></block>
+            </category>
+            <category name="Matemáticas" colour="230">
+                <block type="math_number"></block>
+                <block type="math_arithmetic"></block>
+                <block type="math_single"></block>
+                <block type="math_trig"></block>
+                <block type="math_constant"></block>
+                <block type="math_number_property"></block>
+                <block type="math_round"></block>
+                <block type="math_on_list"></block>
+                <block type="math_modulo"></block>
+                <block type="math_constrain"></block>
+                <block type="math_random_int"></block>
+                <block type="math_random_float"></block>
+            </category>
+            <category name="Textos" colour="160">
+                <block type="text"></block>
+                <block type="text_print"></block>
+                <block type="text_join"></block>
+                <block type="text_append"></block>
+                <block type="text_length"></block>
+                <block type="text_isEmpty"></block>
+                <block type="text_indexOf"></block>
+                <block type="text_charAt"></block>
+                <block type="text_getSubstring"></block>
+                <block type="text_changeCase"></block>
+                <block type="text_trim"></block>
+                <block type="text_prompt_ext"></block>
+            </category>
+            <category name="Listas" colour="260">
+                <block type="lists_create_empty"></block>
+                <block type="lists_create_with"></block>
+                <block type="lists_repeat"></block>
+                <block type="lists_length"></block>
+                <block type="lists_isEmpty"></block>
+                <block type="lists_indexOf"></block>
+                <block type="lists_getIndex"></block>
+                <block type="lists_setIndex"></block>
+                <block type="lists_getSublist"></block>
+                <block type="lists_split"></block>
+                <block type="lists_sort"></block>
+            </category>
+            <category name="Variables" colour="330" custom="VARIABLE"></category>
+            <category name="Funciones" colour="290" custom="PROCEDURE"></category>
+        </xml>`;
+
+        // Inject Blockly workspace into the div
+        var workspace = Blockly.inject('blocklyDiv', {
+            toolbox: toolbox
+        });
+
+        // Smooth scrolling function
+        function smoothScrollTo(element, target, duration) {
+            if (duration <= 0) return;
+            var difference = target - element.scrollTop;
+            var perTick = difference / duration * 10;
+
+            setTimeout(function() {
+                element.scrollTop = element.scrollTop + perTick;
+                if (element.scrollTop === target) return;
+                smoothScrollTo(element, target, duration - 10);
+            }, 10);
+        }
+
+        // Add smooth scrolling when the end of a category is reached
+        workspace.addChangeListener(function(event) {
+            var toolbox = document.querySelector('.blocklyToolboxDiv');
+            if (toolbox.scrollHeight - toolbox.scrollTop === toolbox.clientHeight) {
+                smoothScrollTo(toolbox, toolbox.scrollHeight, 300);
+            }
+        });
+
+        // Generate JavaScript code when the button is clicked
+        document.getElementById('generateCode').addEventListener('click', function() {
+            var code = Blockly.JavaScript.workspaceToCode(workspace);
+            document.getElementById('codeOutput').textContent = code;
+        });
+
+        // Run JavaScript code when the button is clicked
+        document.getElementById('runCode').addEventListener('click', function() {
+            var code = Blockly.JavaScript.workspaceToCode(workspace);
+            try {
+                eval(code);
+            } catch (e) {
+                console.error('Error: ' + e);
+            }
+        });
+
+        function extend() {
+            document.getElementById('codeOutput').style.height = 1000 + 'px';
+        }
+
+        function minimize() {
+            document.getElementById('codeOutput').style.height = 100 + 'px';
+        }
+
+        function quit() {
+            document.getElementById('codeOutput').style.height = 0;
+        }
+    </script>
+</body>
+</html>
